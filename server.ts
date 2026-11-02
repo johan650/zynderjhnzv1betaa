@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 <<<<<<< HEAD
 import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager.js';
-import { GroupMemberBroadcastManager } from './src/services/whatsapp/GroupMemberBroadcastManager.js';
+import { GroupMemberBroadcastManager } from './src/services/whatsapp/GroupMemberBroadcastManager';
 import { AdminStore, PaymentRecord } from './src/services/admin/adminStore';
 import { db } from './src/firebase';
 =======
