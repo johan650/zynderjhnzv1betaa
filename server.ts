@@ -58,7 +58,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+
+// Konfigurasi worker WhatsApp (proses persisten terpisah dari Vercel)
+// - WHATSAPP_WORKER_URL: diisi di deployment Vercel (frontend + API). Request /api/whatsapp/* diteruskan ke worker.
+// - WHATSAPP_WORKER_SECRET: rahasia bersama antara API publik dan worker (dikirim sebagai X-Worker-Secret).
+// - ALLOW_MOCK_AUTH: hanya 'true' untuk pengembangan lokal. Tidak pernah aktif di Vercel.
+const WHATSAPP_WORKER_URL = process.env.WHATSAPP_WORKER_URL?.replace(/\/$/, '') || '';
+const WHATSAPP_WORKER_SECRET = process.env.WHATSAPP_WORKER_SECRET || '';
+const MOCK_AUTH_ENABLED = process.env.ALLOW_MOCK_AUTH === 'true' && !process.env.VERCEL && !process.env.NOW_REGION;
+
+
 
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
@@ -147,7 +157,7 @@ const requireAuth = async (req: AuthRequest, res: Response, next: NextFunction) 
   }
 
   // Support local / preview testing tokens when domain is awaiting whitelist propagation
-  if (idToken.startsWith('mock_token_')) {
+  if (idToken.startsWith('mock_token_') && MOCK_AUTH_ENABLED) {
     const isDevAdmin = idToken.includes('admin');
     const mockUid = isDevAdmin ? 'admin_demo_zynder' : 'user_demo_zynder';
     const mockEmail = isDevAdmin ? 'sumiyatun993@gmail.com' : 'demo.user@zynderjhnz.com';
@@ -385,6 +395,69 @@ app.post('/api/membership/verify-payment', requireAuth, (req: AuthRequest, res) 
 });
 
 // WhatsApp Connection Endpoints (Protected by VIP)
+
+// Proxy ke worker WhatsApp. Auth dan VIP diperiksa di sini, lalu request diteruskan
+// dengan UID terverifikasi. Pengguna hanya bisa mengakses sesinya sendiri karena UID berasal dari token.
+// Jika WHATSAPP_WORKER_URL tidak diisi (mode worker/lokal), request ditangani langsung di bawah.
+app.use('/api/whatsapp', requireAuth, requireVip, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!WHATSAPP_WORKER_URL) {
+    // Di Vercel, koneksi WhatsApp persisten tidak didukung. Jangan jalankan socket di Function.
+    if (process.env.VERCEL || process.env.NOW_REGION) {
+      return res.status(503).json({
+        success: false,
+        error: 'WHATSAPP_WORKER_NOT_CONFIGURED',
+        message: 'Worker WhatsApp belum dikonfigurasi (WHATSAPP_WORKER_URL). Koneksi WhatsApp harus dijalankan di layanan worker persisten.',
+      });
+    }
+    return next(); // Mode lokal: tangani langsung di proses ini
+  }
+
+  const headers: Record<string, string> = {
+    Accept: req.headers.accept || 'application/json',
+    'X-Worker-Secret': WHATSAPP_WORKER_SECRET,
+    'X-User-Uid': req.userUid!,
+    'X-User-Email': req.userEmail || '',
+  };
+  const hasBody = !['GET', 'HEAD'].includes(req.method);
+  if (hasBody) headers['Content-Type'] = 'application/json';
+
+  try {
+    const upstream = await fetch(`${WHATSAPP_WORKER_URL}${req.originalUrl}`, {
+      method: req.method,
+      headers,
+      body: hasBody ? JSON.stringify(req.body ?? {}) : undefined,
+      signal: AbortSignal.timeout(60000),
+    });
+
+    const contentType = upstream.headers.get('content-type') || 'application/json; charset=utf-8';
+    res.status(upstream.status);
+    res.setHeader('Content-Type', contentType);
+
+    // Stream Server-Sent Events apa adanya (status realtime dari worker)
+    if (contentType.includes('text/event-stream') && upstream.body) {
+      res.setHeader('Cache-Control', 'no-cache');
+      res.flushHeaders?.();
+      const reader = upstream.body.getReader();
+      req.on('close', () => reader.cancel().catch(() => {}));
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(Buffer.from(value));
+      }
+      return res.end();
+    }
+
+    return res.send(await upstream.text());
+  } catch (err: any) {
+    console.error('[WHATSAPP PROXY] Worker tidak dapat dihubungi:', err?.message || err);
+    return res.status(502).json({
+      success: false,
+      error: 'WHATSAPP_WORKER_UNREACHABLE',
+      message: 'Layanan worker WhatsApp tidak dapat dihubungi. Pastikan worker berjalan dan WHATSAPP_WORKER_URL benar.',
+    });
+  }
+});
+
 app.get('/api/whatsapp/capabilities', requireAuth, (req: AuthRequest, res) => {
   const uid = req.userUid!;
   const capabilities = WhatsAppManager.getCapabilities(uid);
@@ -1424,6 +1497,31 @@ app.post('/api/membership/acknowledge-approval', requireAuth, async (req: AuthRe
     subscription: sub || null,
     message: 'Status membership VIP telah diverifikasi dan dibuka.',
     acknowledged: true,
+  });
+});
+
+// --- API ERROR CONTRACT ---
+// Semua error /api/* dikembalikan sebagai JSON konsisten, bukan HTML.
+// Express 4 tidak menangkap promise reject dari handler async, jadi handler ini penting.
+app.use('/api', (req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: 'API_NOT_FOUND',
+    message: `Endpoint ${req.method} ${req.originalUrl} tidak ditemukan.`,
+  });
+});
+
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  if (!req.originalUrl.startsWith('/api')) {
+    return res.status(500).send('Internal Server Error');
+  }
+  const status = Number(err?.status || err?.statusCode) || 500;
+  console.error(`[API ERROR] ${req.method} ${req.originalUrl}:`, err?.message || err);
+  if (res.headersSent) return;
+  res.status(status).json({
+    success: false,
+    error: status === 500 ? 'INTERNAL_ERROR' : 'REQUEST_FAILED',
+    message: status === 500 ? 'Terjadi kesalahan pada server.' : err?.message || 'Permintaan gagal.',
   });
 });
 

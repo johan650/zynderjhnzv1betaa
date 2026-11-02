@@ -70,12 +70,16 @@ class ApiClientService {
     };
   }
 
+  // Parse respons API secara aman. Jika server mengembalikan HTML/teks (mis. error proxy platform),
+  // tampilkan status HTTP nyata, bukan error parsing mentah.
   private async safeParseJson(res: Response, fallbackMessage: string): Promise<any> {
     const text = await res.text();
     try {
-      return JSON.parse(text);
+      return text ? JSON.parse(text) : {};
     } catch {
-      throw new Error(`${fallbackMessage} (Status ${res.status}: ${res.statusText || 'Format respons tidak valid'})`);
+      throw new Error(
+        `${fallbackMessage} (HTTP ${res.status}: server mengembalikan respons non-JSON. Periksa log server/worker.)`
+      );
     }
   }
 
@@ -209,7 +213,7 @@ class ApiClientService {
     const headers = await this.getAuthHeaders();
     const res = await fetch('/api/whatsapp/status', { headers });
     const data = await this.safeParseJson(res, 'Gagal memuat status WhatsApp');
-    if (!res.ok) {
+    if (!res.ok || data.success === false) {
       throw new Error(data.message || 'Gagal memuat status WhatsApp.');
     }
     return data;
@@ -223,7 +227,7 @@ class ApiClientService {
       body: JSON.stringify({ provider }),
     });
     const data = await this.safeParseJson(res, 'Gagal menghubungkan WhatsApp');
-    if (!res.ok) {
+    if (!res.ok || data.success === false) {
       throw new Error(data.message || 'Gagal menghubungkan WhatsApp.');
     }
     return data;
@@ -236,8 +240,8 @@ class ApiClientService {
       headers,
       body: JSON.stringify({ phoneNumber }),
     });
-    const data = await res.json();
-    if (!res.ok) {
+    const data = await this.safeParseJson(res, 'Gagal meminta kode pairing WhatsApp');
+    if (!res.ok || data.success === false) {
       throw new Error(data.message || data.error || 'Gagal meminta kode pairing WhatsApp.');
     }
     return data;

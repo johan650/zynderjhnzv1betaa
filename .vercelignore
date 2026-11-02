@@ -1,0 +1,8 @@
+data/sessions/
+data/*.json
+.env
+.env.*
+*.log
+ZIN/
+public/assets/aistudio/
+git-setup.exe

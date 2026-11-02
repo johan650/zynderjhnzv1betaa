@@ -38,11 +38,18 @@ interface InternalUserSession {
   saveCreds?: () => Promise<void>;
 }
 
-const SESSIONS_BASE_DIR = path.resolve(process.cwd(), 'data', 'sessions');
+// Lokasi session. Di worker persisten, arahkan ke volume yang tahan restart (WHATSAPP_SESSIONS_DIR).
+const SESSIONS_BASE_DIR = process.env.WHATSAPP_SESSIONS_DIR
+  ? path.resolve(process.env.WHATSAPP_SESSIONS_DIR)
+  : path.resolve(process.cwd(), 'data', 'sessions');
 
-// Ensure sessions directory exists
-if (!fs.existsSync(SESSIONS_BASE_DIR)) {
-  fs.mkdirSync(SESSIONS_BASE_DIR, { recursive: true });
+// Jangan melempar error saat import: filesystem serverless (Vercel) bersifat read-only.
+try {
+  if (!fs.existsSync(SESSIONS_BASE_DIR)) {
+    fs.mkdirSync(SESSIONS_BASE_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn('[WHATSAPP] Folder session tidak dapat dibuat:', (err as Error).message);
 }
 
 export class GatewaySessionAdapter implements WhatsAppProviderAdapter {
@@ -238,11 +245,11 @@ export class GatewaySessionAdapter implements WhatsAppProviderAdapter {
     }
 
     const sessionDir = this.getSessionPath(session.safeUid);
-    if (!fs.existsSync(sessionDir)) {
-      fs.mkdirSync(sessionDir, { recursive: true });
-    }
 
     try {
+      // Pastikan folder session ada. Jika gagal (misal filesystem read-only), laporkan sebagai ERROR nyata.
+      fs.mkdirSync(sessionDir, { recursive: true });
+
       let { state, saveCreds } = await useMultiFileAuthState(sessionDir);
 
       // CRITICAL DEFENSE: If credentials exist but are unauthenticated (registered === false),

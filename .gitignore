@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Kredensial WhatsApp (sangat sensitif, jangan pernah di-commit)
+data/sessions/
+*.session.json
+server-out.log
+server-err.log
