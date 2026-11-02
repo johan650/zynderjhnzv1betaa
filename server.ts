@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import http from 'http';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
-import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager';
+import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager.js';
 import { GroupMemberBroadcastManager } from './src/services/whatsapp/GroupMemberBroadcastManager';
 import { AdminStore, PaymentRecord } from './src/services/admin/adminStore';
 import { db } from './src/firebase';
