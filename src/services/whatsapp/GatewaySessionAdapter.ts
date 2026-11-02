@@ -15,7 +15,7 @@ import {
   SendResult,
   GroupMetadata,
   GroupMember,
-} from './types';
+} from './types.ts';
 
 interface InternalUserSession {
   uid: string;

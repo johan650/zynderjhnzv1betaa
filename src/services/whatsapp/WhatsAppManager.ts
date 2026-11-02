@@ -5,9 +5,9 @@ import {
   GroupMetadata,
   GroupMember,
   ProviderCapabilities,
-} from './types';
-import { GatewaySessionAdapter } from './GatewaySessionAdapter';
-import { MetaCloudApiAdapter } from './MetaCloudApiAdapter';
+} from './types.ts';
+import { GatewaySessionAdapter } from './GatewaySessionAdapter.ts';
+import { MetaCloudApiAdapter } from './MetaCloudApiAdapter.ts';
 
 class WhatsAppManagerService {
   private gatewayAdapter = new GatewaySessionAdapter();

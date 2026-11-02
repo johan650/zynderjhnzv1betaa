@@ -4,7 +4,7 @@ import {
   WhatsAppConnectionState,
   SendResult,
   GroupMetadata,
-} from './types';
+} from './types.ts';
 
 /**
  * Adapter for Official Meta WhatsApp Business Platform (Cloud API)

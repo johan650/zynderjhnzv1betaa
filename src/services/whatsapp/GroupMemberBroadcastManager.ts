@@ -1,5 +1,5 @@
-import { WhatsAppManager } from './WhatsAppManager';
-import { GroupMemberBroadcastJob } from './types';
+import { WhatsAppManager } from './WhatsAppManager.ts';
+import { GroupMemberBroadcastJob } from './types.ts';
 
 export interface StartGroupMemberDmParams {
   userId: string;

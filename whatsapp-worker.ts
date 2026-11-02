@@ -16,7 +16,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import crypto from 'crypto';
-import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager';
+import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager.ts';
 
 const PORT = Number(process.env.WHATSAPP_WORKER_PORT) || 4000;
 const SECRET = process.env.WHATSAPP_WORKER_SECRET || '';

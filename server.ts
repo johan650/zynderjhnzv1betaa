@@ -4,10 +4,17 @@ import { fileURLToPath } from 'url';
 import http from 'http';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
+<<<<<<< HEAD
 import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager.js';
 import { GroupMemberBroadcastManager } from './src/services/whatsapp/GroupMemberBroadcastManager';
 import { AdminStore, PaymentRecord } from './src/services/admin/adminStore';
 import { db } from './src/firebase';
+=======
+import { WhatsAppManager } from './src/services/whatsapp/WhatsAppManager.ts';
+import { GroupMemberBroadcastManager } from './src/services/whatsapp/GroupMemberBroadcastManager.ts';
+import { AdminStore, PaymentRecord } from './src/services/admin/adminStore.ts';
+import { db } from './src/firebase.ts';
+>>>>>>> a066c4d (Fix whatsApp module import for Vercel)
 import { doc, setDoc, updateDoc, getDoc, serverTimestamp as firestoreTimestamp } from 'firebase/firestore';
 import firebaseConfig from './firebase-applet-config.json';
 
