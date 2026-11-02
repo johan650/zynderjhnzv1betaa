@@ -105,9 +105,15 @@ export interface AuditLogItem {
 }
 
 // In-Memory Persistent Data Store with JSON File Fallback
+// Jangan melempar error saat import. Di Vercel, filesystem read-only: data hanya dimuat
+// jika ada, dan penulisan gagal secara tertangani (sudah dibungkus try/catch di saveToFile).
 const DATA_DIR = path.resolve(process.cwd(), 'data');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn('[AdminStore] Folder data tidak dapat dibuat:', (err as Error).message);
 }
 
 const ADMIN_STORE_FILE = path.join(DATA_DIR, 'admin_data.json');
