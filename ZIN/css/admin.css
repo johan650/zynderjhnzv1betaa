@@ -1,0 +1,15 @@
+/* ZynderJhnzV1Beta /ZIN Admin Theme Variables */
+:root {
+  --zin-bg: #070a13;
+  --zin-card: #0c1222;
+  --zin-border: #1e293b;
+  --zin-cyan: #00d2ff;
+  --zin-purple: #8b5cf6;
+  --zin-accent-glow: rgba(0, 210, 255, 0.15);
+}
+
+body.zin-admin {
+  background-color: var(--zin-bg);
+  color: #f8fafc;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}

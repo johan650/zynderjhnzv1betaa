@@ -1,0 +1,6 @@
+{
+  "name": "ZynderJhnzV1Beta",
+  "description": "WhatsApp Broadcast & Digital Promotion Platform untuk jual beli akun, reseller, dan bisnis digital.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile with role, membership status, and Google identity information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "membership": { "type": "string", "enum": ["FREE", "VIP", "VVIP"] },
+        "accountStatus": { "type": "string", "enum": ["active", "suspended"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastLoginAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "membership", "accountStatus"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "VIP / VVIP membership subscription records.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "tier": { "type": "string", "enum": ["FREE", "VIP", "VVIP"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "EXPIRED", "PENDING"] },
+        "price": { "type": "number" },
+        "activatedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "tier", "status"]
+    },
+    "WhatsAppConnection": {
+      "title": "WhatsApp Connection",
+      "description": "Active real WhatsApp session state and provider identity per user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "provider": { "type": "string", "enum": ["gateway", "cloud_api"] },
+        "status": { "type": "string", "enum": ["CONNECTED", "DISCONNECTED", "CONNECTING", "QR_READY"] },
+        "phoneNumber": { "type": "string" },
+        "qrCode": { "type": "string" },
+        "pairingCode": { "type": "string" },
+        "connectedAt": { "type": "string", "format": "date-time" },
+        "lastHeartbeat": { "type": "string", "format": "date-time" },
+        "lastError": { "type": "string" }
+      },
+      "required": ["uid", "status"]
+    },
+    "BroadcastJob": {
+      "title": "Broadcast Job",
+      "description": "Queued and processing real broadcast tasks.",
+      "type": "object",
+      "properties": {
+        "jobId": { "type": "string" },
+        "uid": { "type": "string" },
+        "type": { "type": "string", "enum": ["GROUP", "CONTACT", "CHANNEL"] },
+        "status": { "type": "string", "enum": ["QUEUED", "PROCESSING", "COMPLETED", "CANCELLED", "FAILED"] },
+        "message": { "type": "string" },
+        "totalTargets": { "type": "number" },
+        "sentCount": { "type": "number" },
+        "failedCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "type", "status", "message"]
+    },
+    "BroadcastHistory": {
+      "title": "Broadcast Delivery History",
+      "description": "Individual delivery receipts verified by WhatsApp provider.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "jobId": { "type": "string" },
+        "target": { "type": "string" },
+        "recipient": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACCEPTED", "DELIVERED", "FAILED"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "recipient", "status"]
+    },
+    "ContactItem": {
+      "title": "Contact Item",
+      "description": "Consented contact recipient for pushkontak.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "tag": { "type": "string" },
+        "consentApproved": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "phone", "consentApproved"]
+    },
+    "Payment": {
+      "title": "Payment Transaction",
+      "description": "VIP membership payments via QRIS or transfer.",
+      "type": "object",
+      "properties": {
+        "paymentId": { "type": "string" },
+        "uid": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["PENDING_VERIFICATION", "APPROVED", "REJECTED", "PENDING", "SUCCESS", "EXPIRED"] },
+        "method": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["paymentId", "uid", "amount", "status"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "System and administrative action logs.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "actorEmail": { "type": "string" },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["action", "timestamp"]
+    },
+    "GroupMemberBroadcast": {
+      "title": "Group Member DM Broadcast",
+      "description": "Direct message campaigns sent to consented members of a WhatsApp group.",
+      "type": "object",
+      "properties": {
+        "broadcastId": { "type": "string" },
+        "userId": { "type": "string" },
+        "groupId": { "type": "string" },
+        "groupName": { "type": "string" },
+        "eligibleRecipientIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "consentStatus": { "type": "string", "enum": ["VERIFIED_CONSENT", "OPT_IN"] },
+        "message": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "deliveryStatus": { "type": "string", "enum": ["QUEUED", "RUNNING", "PAUSED", "STOPPED", "COMPLETED", "FAILED"] },
+        "totalEligible": { "type": "number" },
+        "successCount": { "type": "number" },
+        "failedCount": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "groupId", "groupName", "message", "deliveryStatus", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": { "$ref": "#/entities/User" }, "description": "User profiles indexed by UID" },
+    "/subscriptions/{uid}": { "schema": { "$ref": "#/entities/Subscription" }, "description": "User VIP subscription records" },
+    "/whatsapp_connections/{uid}": { "schema": { "$ref": "#/entities/WhatsAppConnection" }, "description": "WhatsApp device connection states" },
+    "/broadcast_jobs/{jobId}": { "schema": { "$ref": "#/entities/BroadcastJob" }, "description": "Queued broadcast jobs" },
+    "/broadcast_history/{historyId}": { "schema": { "$ref": "#/entities/BroadcastHistory" }, "description": "Delivery receipts from WhatsApp" },
+    "/group_member_broadcasts/{broadcastId}": { "schema": { "$ref": "#/entities/GroupMemberBroadcast" }, "description": "Group member direct message broadcast records" },
+    "/contact_lists/{contactId}": { "schema": { "$ref": "#/entities/ContactItem" }, "description": "Audience contact records" },
+    "/opt_out_contacts/{optOutId}": { "schema": { "$ref": "#/entities/ContactItem" }, "description": "Opted out numbers to be excluded from broadcast" },
+    "/payments/{paymentId}": { "schema": { "$ref": "#/entities/Payment" }, "description": "VIP membership payment orders" },
+    "/admin_settings/{settingId}": { "schema": { "type": "object" }, "description": "Platform settings" },
+    "/audit_logs/{logId}": { "schema": { "$ref": "#/entities/AuditLog" }, "description": "Administrative audit trail" }
+  }
+}

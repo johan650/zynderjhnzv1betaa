@@ -1,0 +1,149 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        ('admin' in request.auth.token && request.auth.token.admin == true) ||
+        (request.auth.token.email == 'sumiyatun993@gmail.com' && request.auth.token.email_verified == true) ||
+        (request.auth.token.email == 'jhnz.co.id@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Connection testing endpoint
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+
+      allow create: if isOwner(userId) &&
+        incoming().uid == userId &&
+        incoming().role == 'user' &&
+        incoming().membership == 'FREE' &&
+        incoming().accountStatus == 'active';
+
+      allow update: if (isOwner(userId) &&
+        incoming().uid == existing().uid &&
+        incoming().role == existing().role &&
+        incoming().membership == existing().membership &&
+        incoming().accountStatus == existing().accountStatus &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'username', 'lastLoginAt', 'updatedAt'])
+      ) || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // Subscriptions Collection (VIP / VVIP)
+    // Users can read their own subscription; only Admin/Server can update tier or expiration
+    match /subscriptions/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // WhatsApp Connections Collection
+    match /whatsapp_connections/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Broadcast Jobs
+    match /broadcast_jobs/{jobId} {
+      allow get, list: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Broadcast History
+    match /broadcast_history/{historyId} {
+      allow get, list: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Group Member DM Broadcast
+    match /group_member_broadcasts/{broadcastId} {
+      allow get, list: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && (incoming().userId == request.auth.uid || incoming().uid == request.auth.uid);
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.uid == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    // Contact Lists
+    match /contact_lists/{contactId} {
+      allow get, list: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
+      allow update: if isSignedIn() && existing().uid == request.auth.uid && incoming().uid == request.auth.uid;
+      allow delete: if isSignedIn() && (existing().uid == request.auth.uid || isAdmin());
+    }
+
+    // Opt-out contacts
+    match /opt_out_contacts/{optOutId} {
+      allow get, list: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Payments
+    // Users can create a pending payment request, but cannot approve it themselves
+    match /payments/{paymentId} {
+      allow get: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid &&
+        (incoming().status == 'PENDING' || incoming().status == 'PENDING_VERIFICATION');
+      allow update: if (isSignedIn() && existing().uid == request.auth.uid && incoming().uid == request.auth.uid && incoming().status == 'PENDING_VERIFICATION') || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Platform settings
+    match /admin_settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Audit logs
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // User activity logs
+    match /user_activity/{activityId} {
+      allow get, list: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

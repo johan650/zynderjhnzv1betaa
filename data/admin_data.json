@@ -1,0 +1,138 @@
+{
+  "adminPasswordHash": "$2b$10$MwR8gg/ZnWbGXRlvLC03aewwjEfdVj4CJnj.pGE053uFXK2LEh28K",
+  "telegramConfig": {
+    "botToken": "",
+    "adminChatId": "",
+    "isActive": false
+  },
+  "settings": {
+    "siteName": "ZynderJhnzV1Beta",
+    "siteDescription": "Platform WhatsApp Automation & Broadcast Canggih Berbasis Multi-Session Gateway",
+    "qrisImageUrl": "",
+    "qrisManualActive": true,
+    "qiospayActive": false,
+    "vipPrice": 10000,
+    "vipDurationDays": 30,
+    "adminWorkingHours": "Senin - Minggu: 08:00 - 22:00 WIB",
+    "whatsappChannelUrl": "https://whatsapp.com/channel/zynderjhnz",
+    "whatsappGroupUrl": "https://chat.whatsapp.com/zynderjhnzsupport",
+    "adminWhatsappUrl": "https://wa.me/6281234567890",
+    "adminTelegramUrl": "https://t.me/zynderjhnz_admin",
+    "customerServiceUrl": "https://wa.me/6281234567890?text=Halo%20Admin%20ZynderJhnz",
+    "announcementActive": true,
+    "announcementText": "🚀 ZynderJhnzV1Beta kini mendukung Group Member DM Broadcast dan integrasi multi-sesi WhatsApp!",
+    "announcementType": "promo",
+    "maintenanceMode": false,
+    "maintenanceMessage": "Sistem sedang dalam peningkatan performa berkala. Silakan kembali beberapa saat lagi.",
+    "updatedAt": "2026-11-02T11:38:09.247Z",
+    "updatedBy": "System"
+  },
+  "payments": [
+    {
+      "id": "INV-20261102-001",
+      "userId": "usr_sample_101",
+      "userName": "Budi Pratama",
+      "userEmail": "budi.pratama@gmail.com",
+      "tier": "VIP",
+      "amount": 10000,
+      "currency": "IDR",
+      "durationDays": 30,
+      "method": "QRIS_MANUAL",
+      "senderName": "Budi Pratama",
+      "senderAccount": "BCA 8291029182",
+      "notes": "Aktivasi membership VIP 30 hari",
+      "status": "APPROVED",
+      "createdAt": "2026-11-02T09:38:09.247Z",
+      "updatedAt": "2026-11-02T11:38:38.814Z",
+      "approvedBy": "JhnzV1Beta",
+      "approvedAt": "2026-11-02T11:38:38.814Z"
+    },
+    {
+      "id": "INV-20261102-002",
+      "userId": "usr_sample_102",
+      "userName": "Siti Rahmawati",
+      "userEmail": "siti.rahma@yahoo.com",
+      "tier": "VIP",
+      "amount": 10000,
+      "currency": "IDR",
+      "durationDays": 30,
+      "method": "QRIS_INSTANT",
+      "senderName": "Siti Rahmawati",
+      "senderAccount": "GoPay 081299887766",
+      "notes": "Pembayaran QRIS instan otomatis",
+      "status": "APPROVED",
+      "approvedBy": "JhnzV1Beta",
+      "approvedAt": "2026-11-01T11:38:09.247Z",
+      "createdAt": "2026-11-01T09:14:09.247Z",
+      "updatedAt": "2026-11-01T11:38:09.247Z"
+    },
+    {
+      "id": "INV-20261101-003",
+      "userId": "usr_sample_103",
+      "userName": "Ahmad Fauzi",
+      "userEmail": "ahmad.fauzi@outlook.com",
+      "tier": "VIP",
+      "amount": 10000,
+      "currency": "IDR",
+      "durationDays": 30,
+      "method": "BANK_TRANSFER",
+      "senderName": "Ahmad Fauzi",
+      "senderAccount": "Mandiri 14000998811",
+      "notes": "Transfer manual ATM",
+      "status": "APPROVED",
+      "approvedBy": "JhnzV1Beta",
+      "approvedAt": "2026-10-31T11:38:09.247Z",
+      "createdAt": "2026-10-31T09:14:09.247Z",
+      "updatedAt": "2026-10-31T11:38:09.247Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "LOG-1793637715171-103",
+      "timestamp": "2026-11-02T16:41:55.171Z",
+      "action": "LOGOUT",
+      "actor": "JhnzV1Beta",
+      "details": "Admin JhnzV1Beta keluar dari Admin Panel.",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "LOG-1793637709123-407",
+      "timestamp": "2026-11-02T16:41:49.123Z",
+      "action": "LOGIN",
+      "actor": "JhnzV1Beta",
+      "details": "Admin JhnzV1Beta berhasil masuk ke Admin Panel.",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "LOG-1793621012675-725",
+      "timestamp": "2026-11-02T12:03:32.675Z",
+      "action": "LOGIN",
+      "actor": "JhnzV1Beta",
+      "details": "Admin JhnzV1Beta berhasil masuk ke Admin Panel.",
+      "ip": "127.0.0.1"
+    },
+    {
+      "id": "LOG-1793619518820-557",
+      "timestamp": "2026-11-02T11:38:38.820Z",
+      "action": "APPROVE_PAYMENT",
+      "actor": "JhnzV1Beta",
+      "details": "Pembayaran INV-20261102-001 untuk user Budi Pratama (budi.pratama@gmail.com) sebesar Rp 10.000 disetujui.",
+      "ip": "127.0.0.1",
+      "previousData": {
+        "status": "PENDING"
+      },
+      "newData": {
+        "status": "APPROVED",
+        "approvedBy": "JhnzV1Beta"
+      }
+    },
+    {
+      "id": "LOG-1793619501967-342",
+      "timestamp": "2026-11-02T11:38:21.967Z",
+      "action": "LOGIN",
+      "actor": "JhnzV1Beta",
+      "details": "Admin JhnzV1Beta berhasil masuk ke Admin Panel.",
+      "ip": "127.0.0.1"
+    }
+  ]
+}

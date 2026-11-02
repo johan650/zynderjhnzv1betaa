@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "regions": ["sin1"],
+  "builds": [
+    { "src": "api/index.ts", "use": "@vercel/node" },
+    { "src": "dist/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "api/index.ts", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"] },
+    { "src": "/ZIN/(.*)", "dest": "api/index.ts" },
+    { "src": "/(.*\\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2|ttf|otf))", "dest": "/dist/$1" },
+    { "src": "/(.*)", "dest": "/dist/index.html" }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}
